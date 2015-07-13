@@ -1,7 +1,11 @@
 body {
-    background-color: black;
+  background-color: black;
 }
 
 div {
-    color: white;
+  color: green;
+}
+
+.column {
+  float: left;
 }

@@ -21,7 +21,7 @@ app.ws('/', function(ws, req) {
   });
   setInterval(function(){
     sendRandomCharacter(ws);
-  },500)
+  },10)
   console.log('socket endpoint reached');
 });
 
