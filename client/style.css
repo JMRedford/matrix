@@ -3,9 +3,23 @@ body {
 }
 
 div {
+  animation-duration: 3s; 
+  animation-name: charFadeIn; 
   color: green;
+  width: 15px;
 }
 
 .column {
   float: left;
+}
+
+
+@keyframes charFadeIn {
+  from {
+    background-color: green;
+  }
+
+  to {
+    background-color: black;
+  }
 }
