@@ -33,4 +33,4 @@ var sendRandomCharacter = function(ws){
 };
 
  
-app.listen(3000);
+app.listen($PORT);
