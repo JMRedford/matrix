@@ -1,5 +1,5 @@
 
-var webSock = new WebSocket('ws://127.0.0.1:3000/');
+var webSock = new WebSocket('ws://mvp-mks18-redford.herokuapp.com');
 
 webSock.onerror = function(err){
   console.log(err);
