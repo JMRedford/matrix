@@ -30,9 +30,13 @@ app.ws('/', function(ws, req) {
 });
 
 var sendRandomCharacter = function(ws){
-  var randNumber = Math.floor(Math.random()*32) +64;
+  var randNumber = Math.floor(Math.random()*83) +12353;
   var sendData = '&#'+randNumber;
+  try{
   ws.send(sendData);
+  } catch (err) {
+    clearInterval(randCharIntervalID);
+  }
 };
 
  

@@ -4,7 +4,7 @@ var webSock = new WebSocket('ws://mvp-mks18-redford.herokuapp.com');
 
 
 var NUM_COLS = Math.floor(window.innerWidth/16);
-var NUM_ROWS = Math.floor(window.innerHeight/18);
+var NUM_ROWS = Math.floor(window.innerHeight/22);
 var sockOpen = false;
 var columnArray = [];
 
@@ -23,7 +23,7 @@ window.onload = function(){
 window.onkeydown = function(e){
   var respObj = {32:'space',37:'a',38:'w',39:'d',40:'s'}
   console.log(e.keyCode);
-  if (sockOpen){
+  if (sockOpen && respObj[e.keyCode]){
     webSock.send(respObj[e.keyCode]);
   }
 };
