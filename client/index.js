@@ -12,4 +12,7 @@ webSock.onopen = function (event) {
 
 webSock.onmessage = function(e){
   console.log(e.data);
+  var elemDiv = document.createElement('div');
+  elemDiv.innerHTML = e.data;
+  document.body.appendChild(elemDiv);
 };
