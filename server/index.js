@@ -1,6 +1,8 @@
 var express = require('express');
 var app = express();
 var expressWs = require('express-ws')(app);
+var gameHandler = require('./gameHandler');
+var randCharIntervalID;
 
 app.use(express.static(__dirname+ '/../client'));
 
@@ -18,8 +20,10 @@ app.get('/', function(req, res, next){
 app.ws('/', function(ws, req) {
   ws.on('message', function(msg) {
     console.log(msg);
+    gameHandler(msg);
+    clearInterval(randCharIntervalID);
   });
-  setInterval(function(){
+  randCharIntervalID = setInterval(function(){
     sendRandomCharacter(ws);
   },1)
   console.log('socket endpoint reached');
