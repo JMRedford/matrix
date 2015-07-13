@@ -21,12 +21,11 @@ app.ws('/', function(ws, req) {
   });
   setInterval(function(){
     sendRandomCharacter(ws);
-  },10)
+  },1)
   console.log('socket endpoint reached');
 });
 
 var sendRandomCharacter = function(ws){
-  console.log('attempting to send random character')
   var randNumber = Math.floor(Math.random()*32) +64;
   var sendData = '&#'+randNumber;
   ws.send(sendData);

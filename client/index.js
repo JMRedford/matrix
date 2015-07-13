@@ -1,9 +1,9 @@
 
-//var webSock = new WebSocket('ws://mvp-mks18-redford.herokuapp.com');
-var webSock = new WebSocket('ws://127.0.0.1:3000')
+var webSock = new WebSocket('ws://mvp-mks18-redford.herokuapp.com');
+//var webSock = new WebSocket('ws://127.0.0.1:3000')
 
 
-var NUM_COLS = 40;
+var NUM_COLS = 80;
 var columnArray = [];
 
 window.onload = function(){
@@ -11,7 +11,6 @@ window.onload = function(){
   for (var i = 0; i < NUM_COLS; i++){
     columnArray.push($('<div>').addClass('column').appendTo(document.body));
 
-    console.log(columnArray[i]);
   }  
 }
 
@@ -26,7 +25,7 @@ webSock.onopen = function (event) {
 };
 
 webSock.onmessage = function(e){
-  console.log(e.data);
+
   var newDiv = $('<div>').html(e.data);
   var n = Math.floor(Math.random()*NUM_COLS);
   newDiv.appendTo(columnArray[n]);
