@@ -1,0 +1,30 @@
+
+###Node###
+
+lib-cov
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
+
+pids
+logs
+results
+
+npm-debug.log
+node_modules
+
+###PhPStorm###
+
+.idea/
+
+###SublimeText###
+
+# SublimeText project files
+*.sublime-workspace
+
+# bower
+client/bower_components
