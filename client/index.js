@@ -7,6 +7,7 @@ var NUM_COLS = Math.floor(window.innerWidth/16);
 var NUM_ROWS = Math.floor(window.innerHeight/22);
 var sockOpen = false;
 var columnArray = [];
+var pId = -1;
 
 window.onload = function(){
   console.log('document loaded, making columns');
@@ -38,7 +39,18 @@ webSock.onopen = function (event) {
 };
 
 webSock.onmessage = function(e){
+  if (e.data[0] !== '{') {
+    introScreen(e);
+  } else {
+    switch (e.data.command){
+      case 'setId':
+        pId = e.data.theId;
+        break;
+    }
+  }
+};
 
+var introScreen = function(e){
   var n = Math.floor(Math.random()*NUM_COLS);
   if (!columnArray[n].filledOnce){
     var newDiv = $('<div>').html(e.data);
