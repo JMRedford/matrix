@@ -21,4 +21,8 @@ app.ws('/', function(ws, req) {
 
 gameHandler.initGameBoard();
 
+setInterval(function(){
+  gameHandler.updateBoard();
+},25);
+
 app.listen(process.env.PORT || 3000);

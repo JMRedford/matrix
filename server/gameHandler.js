@@ -5,6 +5,7 @@ module.exports = {
   worldWidth: 100,
   worldHeight: 100,
   players: {},
+  attacks: [],
 
   gameBoard: [],
 
@@ -23,7 +24,7 @@ module.exports = {
   
   makePlayer: function(ws){
     this.pIdCount++;
-    this.players[this.pIdCount] = {'conn':ws, 'started':false};
+    this.players[this.pIdCount] = {'conn':ws, 'started':false, 'direction':'w', 'animatingframes':0};
     ws.send(JSON.stringify({'command':'setId','theId':this.pIdCount}));
     var that = this;
     this.players[this.pIdCount].SendID = setInterval(function(){
@@ -48,11 +49,52 @@ module.exports = {
       var p = this.players[pId];
 
       switch (key){
+        case 'space':
+          switch(p.direction){
+            case 'a':
+              if (p.loc[0]>0){
+                this.gameBoard[p.loc[0]-1][p.loc[1]] = '-';
+                this.attacks.push({
+                  'loc':[p.loc[0]-1,p.loc[1]],
+                  'frames':0
+                });
+              }
+              break;
+            case 's':
+              if (p.loc[1]<98){
+                this.gameBoard[p.loc[0]][p.loc[1]+1] = '|';
+                this.attacks.push({
+                  'loc':[p.loc[0],p.loc[1]+1],
+                  'frames':0
+                });
+              }
+              break;
+            case 'd':
+              if (p.loc[0]<98){
+                this.gameBoard[p.loc[0]+1][p.loc[1]] = '-';
+                this.attacks.push({
+                  'loc':[p.loc[0]+1,p.loc[1]],
+                  'frames':0
+                });
+              }
+              break;
+            case 'w':
+              if (p.loc[1]>0){
+                this.gameBoard[p.loc[0]][p.loc[1]-1] = '|';
+                this.attacks.push({
+                  'loc':[p.loc[0],p.loc[1]-1],
+                  'frames':0
+                });
+              }
+              break;
+          }
+          break;
         case 'w':
           if (p.loc[1]>0 && this.gameBoard[p.loc[0]][p.loc[1]-1] === ' '){
             this.gameBoard[p.loc[0]][p.loc[1]] = ' ';
             this.gameBoard[p.loc[0]][p.loc[1]-1] = 'N'
             p.loc = [p.loc[0],p.loc[1]-1];
+            p.direction = 'w';
           }
           break;
         case 'd':
@@ -60,6 +102,7 @@ module.exports = {
             this.gameBoard[p.loc[0]][p.loc[1]] = ' ';
             this.gameBoard[p.loc[0]+1][p.loc[1]] = 'N';
             p.loc = [p.loc[0]+1,p.loc[1]];
+            p.direction = 'd';
           }
           break;
         case 's':
@@ -67,6 +110,7 @@ module.exports = {
             this.gameBoard[p.loc[0]][p.loc[1]] = ' ';
             this.gameBoard[p.loc[0]][p.loc[1]+1] = 'N';
             p.loc = [p.loc[0],p.loc[1]+1];
+            p.direction = 's';
           }
           break;
         case 'a':
@@ -74,6 +118,7 @@ module.exports = {
             this.gameBoard[p.loc[0]][p.loc[1]] = ' ';
             this.gameBoard[p.loc[0]-1][p.loc[1]] = 'N';
             p.loc = [p.loc[0]-1,p.loc[1]];
+            p.direction = 'a';
           }
           break;
       }
@@ -114,7 +159,24 @@ module.exports = {
     }
   },
 
+  updateBoard: function(){
+    var toRemove = [];
+    for (var i = 0;i < this.attacks.length;i++){
+      this.attacks[i].frames++;
+      if (this.attacks[i].frames > 3){
+        toRemove.push(i);
+      }
+    }
+    for (var i = 0;i < toRemove.length;i++){
+      var loc = this.attacks[toRemove[i]-i].loc;
+      this.gameBoard[loc[0]][loc[1]] = ' ';
+      this.attacks.splice(toRemove[i]-i,1);
+    }
+  },
+
   sendGameState: function(ws,loc){
-    ws.send(JSON.stringify({'command':'update', 'board':this.gameBoard, 'loc':loc}));
+    try{
+      ws.send(JSON.stringify({'command':'update', 'board':this.gameBoard, 'loc':loc}));
+    } catch(err){}
   }
 }
