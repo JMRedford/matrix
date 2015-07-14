@@ -1,2 +1,5 @@
-# matrix
-Using websockets to stream random characters to the client in a Matrix-like style.
+# Matrix
+
+A multiplayer UTF-8 game.
+
+Be N(eo)... and beat up (Agent) S(miths).
