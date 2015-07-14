@@ -8,9 +8,9 @@ var NUM_ROWS = Math.floor(window.innerHeight/22);
 var sockOpen = false;
 var columnArray = [];
 var pId = -1;
+var playerLoc = [10,10];
 
 window.onload = function(){
-  console.log('document loaded, making columns');
   for (var i = 0; i < NUM_COLS; i++){
     columnArray.push({
       characterDomContainer: $('<div>').addClass('column').appendTo(document.body),
@@ -23,9 +23,8 @@ window.onload = function(){
 
 window.onkeydown = function(e){
   var respObj = {32:'space',37:'a',38:'w',39:'d',40:'s'}
-  console.log(e.keyCode);
-  if (sockOpen && respObj[e.keyCode]){
-    webSock.send(respObj[e.keyCode]);
+  if (sockOpen && respObj[e.keyCode] && screenFilledOnce()){
+    webSock.send(JSON.stringify({'key':respObj[e.keyCode], 'pId':pId}));
   }
 };
 
@@ -39,14 +38,24 @@ webSock.onopen = function (event) {
 };
 
 webSock.onmessage = function(e){
-  if (e.data[0] !== '{') {
-    introScreen(e);
-  } else {
-    switch (e.data.command){
+  try{
+    var data = JSON.parse(e.data);
+    switch (data.command){
       case 'setId':
-        pId = e.data.theId;
+        pId = data.theId;
+        break;
+      case 'startGame':
+        NUM_ROWS++;
+        playerLoc = data.loc;
+        screenDraw(data.board,playerLoc[0],playerLoc[1]);
+        break;
+      case 'update':
+        playerLoc = data.loc;
+        screenDraw(data.board,data.loc[0],data.loc[1]);
         break;
     }
+  } catch (err){
+    introScreen(e);
   }
 };
 
@@ -76,3 +85,30 @@ var introScreen = function(e){
     }
   }
 };
+
+var setScreen = function(r,c,what){
+  columnArray[c].characters[r].html(what);
+};
+
+var screenDraw = function(board, playerx, playery){
+  var startCol = Math.min(Math.max(Math.floor(playerx - NUM_COLS/2),0),Math.floor(100-NUM_COLS));
+  var startRow = Math.min(Math.max(Math.floor(playery - NUM_ROWS/2),0),Math.floor(100- NUM_ROWS));
+  var row = 0;
+  var col = 0;
+  for (var i = 0; i < NUM_ROWS; i++){
+    row = i + startRow;
+    for (var j = 0; j < NUM_COLS; j++){
+      col = j + startCol;
+      if (board[col][row] === 'N') console.log('printing player at: '+row+' : '+col);
+      setScreen(i,j,board[col][row]);
+    }
+  }
+};
+
+var screenFilledOnce = function(){
+  var retBool = true;
+  for (var i = 0; i < columnArray.length; i++){
+    if (!columnArray[i].filledOnce) retBool = false;
+  }
+  return retBool;
+}

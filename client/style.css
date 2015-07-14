@@ -6,10 +6,11 @@ div {
   animation-duration: 3s; 
   animation-name: charFadeIn; 
   color: green;
-  width: 15px;
+  height: 20px;
 }
 
 .column {
+  width: 15px;
   float: left;
 }
 

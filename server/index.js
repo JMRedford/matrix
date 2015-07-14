@@ -12,16 +12,13 @@ app.get('/', function(req, res, next){
 app.ws('/', function(ws, req) {
   
   gameHandler.makePlayer(ws);
-  ws.on('message', gameHandler.handleMsg(msg)); 
 
-  // numPlayers++;
-  // playerArray.push({'id': numPlayers, 'conn': ws });
-
-  // ws.on('message', function(msg) {
-  //   console.log(msg);
-  //   gameHandler.handleMsg(msg);
-  // });
-  console.log('socket endpoint reached');
+  ws.on('message', function(msg) {
+    gameHandler.handleMsg(msg);
+  });
+ 
 });
+
+gameHandler.initGameBoard();
 
 app.listen(process.env.PORT || 3000);

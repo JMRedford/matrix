@@ -15,30 +15,93 @@ module.exports = {
         this.gameBoard[i].push(' ');
       }
     }  
+    for (var i = 0; i < 50; i++){
+      this.gameBoard[Math.floor(Math.random()*100)][Math.floor(Math.random()*100)] = 'S';
+    }
   },
   //generate an empty game Board
   
   makePlayer: function(ws){
     this.pIdCount++;
-    this.players[this.pIdCount] = {'conn':ws};
-    ws.send({'command':'setId','theId':this.pIdCount});
+    this.players[this.pIdCount] = {'conn':ws, 'started':false};
+    ws.send(JSON.stringify({'command':'setId','theId':this.pIdCount}));
     var that = this;
-    this.players[this.pIdCount].randSendID = setInterval(function(){
+    this.players[this.pIdCount].SendID = setInterval(function(){
       that.sendRandomCharacter(ws,that.pIdCount);
-    },1);
+    },2);
   },
 
   destroyPlayer: function(pId){
-    this.players[pId].conn.end();
-    delete this.players[pId];
+    try{
+      this.players[pId].conn.close();
+      delete this.players[pId];
+    } catch (err){}
   },
 
   handleMsg: function(msg){
-    var pId = msg.data.pId;
-    if (this.players[pId].randSendID){
-      clearInterval(this.players[pId].randSendID);
-      delete this.players[pId.randSendID];
+
+    var data = JSON.parse(msg);
+    var pId = data.pId;
+    var key = data.key;
+
+    if (this.players[pId].started){
+      var p = this.players[pId];
+
+      switch (key){
+        case 'w':
+          if (p.loc[1]>0 && this.gameBoard[p.loc[0]][p.loc[1]-1] === ' '){
+            this.gameBoard[p.loc[0]][p.loc[1]] = ' ';
+            this.gameBoard[p.loc[0]][p.loc[1]-1] = 'N'
+            p.loc = [p.loc[0],p.loc[1]-1];
+          }
+          break;
+        case 'd':
+          if (p.loc[0]<99 && this.gameBoard[p.loc[0]+1][p.loc[1]] === ' '){
+            this.gameBoard[p.loc[0]][p.loc[1]] = ' ';
+            this.gameBoard[p.loc[0]+1][p.loc[1]] = 'N';
+            p.loc = [p.loc[0]+1,p.loc[1]];
+          }
+          break;
+        case 's':
+          if (p.loc[1]<99 && this.gameBoard[p.loc[0]][p.loc[1]+1] === ' '){
+            this.gameBoard[p.loc[0]][p.loc[1]] = ' ';
+            this.gameBoard[p.loc[0]][p.loc[1]+1] = 'N';
+            p.loc = [p.loc[0],p.loc[1]+1];
+          }
+          break;
+        case 'a':
+          if (p.loc[0]>0 && this.gameBoard[p.loc[0]-1][p.loc[1]] === ' '){
+            this.gameBoard[p.loc[0]][p.loc[1]] = ' ';
+            this.gameBoard[p.loc[0]-1][p.loc[1]] = 'N';
+            p.loc = [p.loc[0]-1,p.loc[1]];
+          }
+          break;
+      }
+    } else {  
+      clearInterval(this.players[pId].SendID);
+      var loc = [0,0];
+      var locationFound = false;
+      while (!locationFound){
+        loc = [Math.floor(Math.random()*100),
+               Math.floor(Math.random()*100)];        
+        if (this.gameBoard[loc[0]][loc[1]] === ' ') {
+          locationFound = true;
+          this.players[pId].loc = loc;
+        }
+      }
+      this.gameBoard[loc[0]][loc[1]] = 'N';
+      this.players[pId].started = true;
+      this.players[pId].conn.send(JSON.stringify({
+        'command':'startGame',
+        'loc':loc,
+        'board':this.gameBoard
+      }));
+      var that = this;
+      this.players[pId].SendID = setInterval(function(){
+        that.sendGameState(that.players[pId].conn, that.players[pId].loc);
+      },25);
     }
+
   },
 
   sendRandomCharacter: function(ws, pId){
@@ -47,7 +110,11 @@ module.exports = {
     try{
       ws.send(sendData);
     } catch (err) {
-      this.destroyPlayer(pId);
+      
     }
+  },
+
+  sendGameState: function(ws,loc){
+    ws.send(JSON.stringify({'command':'update', 'board':this.gameBoard, 'loc':loc}));
   }
 }
